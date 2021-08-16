@@ -1,0 +1,14 @@
+[default]
+name=Default
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=/var/home/syabro/.var/app/org.gnome.Builder/cache/gnome-builder/install/love_tcp_cam/host
+app-id=
+postbuild=
+prebuild=
+default=true
+
+[default.environment]
+XDG_RUNTIME_DIR=/

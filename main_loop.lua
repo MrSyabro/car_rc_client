@@ -1,6 +1,3 @@
-local objs = {}
-
-
 -- Immage stream thread object
 objs[1] = {}
 objs[1].name = "stream_thread"

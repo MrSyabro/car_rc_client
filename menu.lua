@@ -1,6 +1,3 @@
-local objs = generate_scene()
-
-
 objs[1] = {}
 objs[1].name = "ip_text_input"
 objs[1].printed_name = "IP"
@@ -23,10 +20,10 @@ objs[1].draw = function ( self )
 		love.graphics.setColor( self.color )
 	end
 	love.graphics.polygon( "line", 
-	self.pos.x, self.pos.y, 
-	self.pos.x + self.size.w, self.pos.y, 
-	self.pos.x + self.size.w, self.pos.y + self.size.h, 
-	self.pos.x, self.pos.y + self.size.h )
+		self.pos.x, self.pos.y, 
+		self.pos.x + self.size.w, self.pos.y, 
+		self.pos.x + self.size.w, self.pos.y + self.size.h, 
+		self.pos.x, self.pos.y + self.size.h )
 	love.graphics.print(self.printed_name, self.pos.x - 15, self.pos.y + 4)
 	love.graphics.print(self.textinput, self.pos.x + 5, self.pos.y + 4)
 end
@@ -74,7 +71,7 @@ objs[2].mousepressed = function (self, x, y, button, istouch, presses)
 		tmp_x = x - self.pos.x
 		tmp_y = y - self.pos.y
 		if (tmp_x < self.size.w and tmp_x > 0) and (tmp_y < self.size.h and tmp_y > 0) then
-			self.text:set({ self.colors.text, "OK!" })
+			--self.text:set({ self.colors.text, "OK!" })
 			objs:select_obj(self)
 		end
 	end

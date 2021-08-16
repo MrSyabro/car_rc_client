@@ -4,7 +4,54 @@ local M = {}
 
 M.textinput = ""
 
-function generate_scene()
+function M:init(love)
+	function love.load()
+		self:load()
+	end
+	
+	function love.update(dt)
+		self:update(dt)
+	end
+	
+	function love.draw()
+		self:draw()
+	end
+	
+	function love.keypressed(key, scancode, isrepeat)
+		self:keypressed(key, scancode, isrepeat)
+	end
+	
+	function love.keyreleased(key, scancode)
+		self:keyreleased(key, scancode)
+	end
+	
+	function love.textinput(t)
+		self:textinput(t)
+	end
+	
+	function love.mousemoved( x, y, dx, dy, istouch )
+		self:mousemoved( x, y, dx, dy, istouch )
+	end
+	
+	function love.mousepressed( x, y, button, istouch, presses )
+		self:mousepressed( x, y, button, istouch, presses )
+	end
+	
+	function love.mousereleased( x, y, button, istouch, presses )
+		self:mousereleased( x, y, button, istouch, presses )
+	end
+	
+	function love.wheelmoved( x, y )
+		self:wheelmoved( x, y )
+	end
+	
+	function love.quit()
+		print("Thanks for playing! Come back soon!")
+		--love.thread.getChannel( "app" ):push("stop")
+	end
+end
+
+local function generate_scene()
 	local S = {}
 	S.keys = {}
 	S.keys.pressed = {}
@@ -14,6 +61,10 @@ function generate_scene()
 	S.mouse.released = {}
 	S.mouse.move = {}
 	S.mouse.wheel = {}
+	S.touch = {}
+	S.touch.pressed = {}
+	S.touch.released = {}
+	S.touch.moove = {}
 	
 	function S:register_kb_callback (event, obj)
 		assert(self.keys[event])
@@ -24,23 +75,35 @@ function generate_scene()
 		assert(self.mouse[event])
 		table.insert(self.mouse[event], obj)
 	end
+
+	function S:register_touch_callback (event, obj)
+		assert(self.touch[event])
+		table.insert(self.touch[event], obj)
+	end
 	
 	function S:select_obj (obj)
-		if S.selected ~= obj then
-			if S.selected then
-				S.selected.selected = false
+		if self.selected ~= obj then
+			if self.selected then
+				self.selected.selected = false
 			end
-			S.selected = obj
-			S.selected.selected = true
+			self.selected = obj
+			self.selected.selected = true
 			print("Select object:" .. obj.name)
 		end
+	end
+
+	function S:add_object(obj)
+		table.insert(self, obj)
+		obj:load()
 	end
 	
 	return S
 end
 
 function M:load_scene(file_name)
-	self.current_scene = assert(loadfile(file_name))()
+	local env = _G
+	env.objs = generate_scene()
+	self.current_scene = assert(loadfile(file_name, "bt", env))()
 	self.current_scene:select_obj(self.current_scene[1])
 end
 
@@ -93,7 +156,7 @@ end
 
 function M:mousemoved( x, y, dx, dy, istouch )
 	for k, obj in ipairs(self.current_scene.mouse.move) do
-		event(x ,y, dx, dy, istouch)
+		obj:mousemoved(x ,y, dx, dy, istouch)
 	end
 end
 
@@ -112,6 +175,24 @@ end
 function M:wheelmoved( x, y )
 	for k, obj in ipairs(mouse.wheel) do
 		obj:wheelmoved(x, y)
+	end
+end
+
+function M:touchmoved( x, y, dx, dy, istouch )
+	for k, obj in ipairs(self.current_scene.touch.move) do
+		obj:touchmoved(x ,y, dx, dy, istouch)
+	end
+end
+
+function M:touchpressed( x, y, button, istouch, presses )
+	for k, obj in ipairs(self.current_scene.touch.pressed) do
+		obj:touchpressed(x, y, button, istouch, presses)
+	end
+end
+
+function M:touchreleased( x, y, button, istouch, presses )
+	for k, obj in ipairs(self.current_scene.touch.released) do
+		obj:touchreleased(x, y, button, istouch, presses)
 	end
 end
 
