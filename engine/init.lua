@@ -53,32 +53,35 @@ end
 
 local function generate_scene()
 	local S = {}
+	local meta = {__index = table}
 	S.keys = {}
 	S.keys.pressed = {}
 	S.keys.released = {}
 	S.mouse = {}
 	S.mouse.pressed = {}
 	S.mouse.released = {}
-	S.mouse.move = {}
+	S.mouse.moved = {}
 	S.mouse.wheel = {}
 	S.touch = {}
 	S.touch.pressed = {}
 	S.touch.released = {}
-	S.touch.moove = {}
+	S.touch.moved = {}
+	S.loaded = false
+	setmetatable(S, meta)
 	
-	function S:register_kb_callback (event, obj)
-		assert(self.keys[event])
-		table.insert(self.keys[event], obj)
+	function S.keys:register (event, obj)
+		assert(self[event], ("not found callback named '%s'"):format(event))
+		table.insert(self[event], obj)
 	end
 	
-	function S:register_mouse_callback (event, obj)
-		assert(self.mouse[event])
-		table.insert(self.mouse[event], obj)
+	function S.mouse:register (event, obj)
+		assert(self[event], ("not found callback named '%s'"):format(event))
+		table.insert(self[event], obj)
 	end
 
-	function S:register_touch_callback (event, obj)
-		assert(self.touch[event])
-		table.insert(self.touch[event], obj)
+	function S.touch:register (event, obj)
+		assert(self[event], ("not found callback named '%s'"):format(event))
+		table.insert(self[event], obj)
 	end
 	
 	function S:select_obj (obj)
@@ -93,8 +96,22 @@ local function generate_scene()
 	end
 
 	function S:add_object(obj)
-		table.insert(self, obj)
-		obj:load()
+		self:insert(obj)
+		if self.loaded then obj:load() end
+	end
+
+	function S:remove_object(obj)
+		if type(obj) == "number" then
+			self:remove(obj)
+		elseif type(obj) == "table" then
+			for i, k in ipairs(self) do
+				if obj == k then
+					self:remove(i)
+					return nil
+				end
+			end
+			error("object not found")
+		else error("bad argument type") end
 	end
 	
 	return S
@@ -113,6 +130,7 @@ function M:load()
 			object:load()
 		end
 	end
+	self.current_scene.loaded = true
 end
 
 function M:update(dt)
@@ -155,7 +173,7 @@ function M:keyreleased(key, scancode)
 end
 
 function M:mousemoved( x, y, dx, dy, istouch )
-	for k, obj in ipairs(self.current_scene.mouse.move) do
+	for k, obj in ipairs(self.current_scene.mouse.moved) do
 		obj:mousemoved(x ,y, dx, dy, istouch)
 	end
 end
@@ -173,7 +191,7 @@ function M:mousereleased( x, y, button, istouch, presses )
 end
 
 function M:wheelmoved( x, y )
-	for k, obj in ipairs(mouse.wheel) do
+	for k, obj in ipairs(self.current_scene.mouse.wheel) do
 		obj:wheelmoved(x, y)
 	end
 end
